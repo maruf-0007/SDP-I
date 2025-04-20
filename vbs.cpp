@@ -1,10 +1,6 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <iomanip>
 #include <string>
-#include <limits>
-#include <conio.h>
+#include <conio.h> // Windows-specific header for _getch()
 using namespace std;
 
 // Windows-specific password reader
