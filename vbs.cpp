@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include <direct.h>
 using namespace std;
 
 class PasswordReader {
@@ -72,6 +73,13 @@ private:
 
     void encryptDecrypt(string& data, char key = 'X') {
         for(char& c : data) c ^= key;
+    }
+
+    void logTransaction(int accountNumber, const string& entry) {
+        _mkdir("logs");
+        ofstream log("logs/account_" + to_string(accountNumber) + ".txt", ios::app);
+        log << entry << endl;
+        log.close();
     }
 
 public:
@@ -180,6 +188,7 @@ public:
         }
         if (accounts[index].deposit(amount)) {
             saveToFile();
+            logTransaction(accounts[index].getAccountNumber(), "[Deposit] " + amountStr + " tk ");
             cout << "✅ Deposit successful! New balance: " << fixed << setprecision(2) << accounts[index].getBalance() << " tk\n";
         } else {
             cout << "❌ Invalid amount!\n";
@@ -200,6 +209,7 @@ public:
         }
         if (accounts[index].withdraw(amount)) {
             saveToFile();
+            logTransaction(accounts[index].getAccountNumber(), "[Withdraw] " + amountStr + " tk ");
             cout << "✅ Withdrawal successful! New balance: " << fixed << setprecision(2) << accounts[index].getBalance() << " tk\n";
         } else {
             cout << "❌ Insufficient balance or invalid amount!\n";
@@ -249,6 +259,8 @@ public:
         accounts[index].withdraw(amount);
         accounts[targetIndex].deposit(amount);
         saveToFile();
+        logTransaction(accounts[index].getAccountNumber(), "[Transfer] " + amountStr + " tk to " + targetAccNumStr);
+        logTransaction(targetAccNum, "[Received] " + amountStr + " tk from " + to_string(accounts[index].getAccountNumber()));
         cout << "✅ Transfer successful! New balance: " << fixed << setprecision(2) << accounts[index].getBalance() << " tk\n";
     }
 
@@ -270,8 +282,8 @@ public:
         cout << "✅ Password reset successfully.\n";
     }
 
-    void showTransactions(int accNum) {
-        ifstream log("logs/account_" + to_string(accNum) + ".txt");
+    void showTransactions(int accountNumber) {
+        ifstream log("logs/account_" + to_string(accountNumber) + ".txt");
         if (!log) {
             cout << "No transactions found.\n";
             return;
